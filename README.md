@@ -1,2 +1,0 @@
-# parku
-Projeto para 

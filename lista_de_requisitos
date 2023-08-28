@@ -1,0 +1,35 @@
+# park-U
+Lista de Requisitos do Projeto "Park-U"
+
+Data: 27/08/2023
+
+Responsável: José Albério Bezerra Demésio
+
+1. Requisitos Funcionais
+
+1.1. Registro de entrada e saída
+O funcionário do estacionamento deve realizar o registro do carro ao ingressar no estacionamento. Deve ser digitada a placa e preenchida o fabricante e modelo do veículo. Ao encerrar a utilização do estacionamento, o funcionário digitará a placa do veículo na saída e o sistema calculará o tempo utilizado e o valor a ser pago.
+1.2. Registro e exibição das vagas disponíveis
+O sistema exibirá na tela inicial a quantidade de vagas disponíveis no estacionamento. Neste valor, deve-se subtrair o número de vagas reservadas para mensalistas. Com ele, o funcionário poderá controlar a quantidade de clientes acessando o estacionamento.
+1.3. Reserva de Vagas para Clientes Mensais
+Clientes mensais têm a opção de reservar uma vaga para uso contínuo durante o mês. Isso garante que eles tenham uma vaga reservada mesmo em horários de pico. 
+1.4. Configuração de número de vagas totais
+O sistema terá um menu de opções, em que se pode configurar o número de vagas totais do estacionamento. Esse número será utilizado para os cálculos de vagas disponíveis.
+
+2. Requisitos Não Funcionais
+
+Desempenho:
+O tempo de resposta para processar reservas, pagamentos e registros de entrada/saída não deve exceder 3 segundos.
+
+Usabilidade e Interface do Usuário:
+A interface do usuário deve ser intuitiva e fácil de usar;
+As informações sobre disponibilidade de vagas e tarifas devem ser apresentadas de forma clara e compreensível.
+Compatibilidade:
+O sistema deve ser compatível com os principais navegadores web, como Chrome, Firefox, Safari e Edge.
+
+Disponibilidade:
+O sistema deve estar disponível 24/7, com possibilidade de manutenção programada fora dos horários de pico.
+
+Manutenção e Escalabilidade:
+O sistema deve ser modular e escalável, permitindo a adição de novas funcionalidades e o aumento da capacidade conforme necessário.
+
