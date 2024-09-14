@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Saida de Veículo - ParkU</title>
+    <script>
+        function formatPlaca(input) {
+            // Remove caracteres especiais e converte para maiúsculas
+            let placa = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+            // Adiciona o hífen após os três primeiros caracteres
+            if (placa.length > 3) {
+                placa = placa.slice(0, 3) + '-' + placa.slice(3);
+            }
+
+            // Atualiza o valor do campo de entrada
+            input.value = placa;
+        }
+    </script>
+</head>
+<body>
+    <h1>Registrar Saida de Veículo</h1>
+    <form action="/saida" method="post">
+        <label for="placa">Placa:</label>
+        <input type="text" id="placa" name="placa" required oninput="formatPlaca(this)" maxlength="8"><br>
+
+        <input type="submit" value="Registrar Saida">
+    </form>
+    <div class="popup-content">
+        <h2></h2>
+        <button onclick="window.location.href='/'">Voltar para a página inicial</button>
+    </div>
+</body>
+</html>

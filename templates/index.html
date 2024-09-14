@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Park-U</title>
+</head>
+<body>
+    <h1>Bem-vindo ao Park-U</h1>
+    <ul>
+        <li><a href="{{ url_for('entrada_veiculo') }}">Registrar Entrada de Veículo</a></li>
+        <li><a href="{{ url_for('saida_veiculo') }}">Registrar Saída de Veículo</a></li>
+    </ul>
+    <a href="/configuracoes" style="position: absolute; top: 10px; right: 10px;">Configurações</a>
+</body>
+</html>
