@@ -3,7 +3,7 @@
 # Faculdade Impacta
 # Aluno: José Albério Bezerra Demésio
 
-vfrom flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template
 import pymysql
 from datetime import datetime
 
