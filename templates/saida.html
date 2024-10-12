@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Saida de Veículo - ParkU</title>
+    <title>Registrar Saída de Veículo - ParkU</title>
     <script>
         function formatPlaca(input) {
             // Remove caracteres especiais e converte para maiúsculas
@@ -18,14 +18,61 @@
             input.value = placa;
         }
     </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap; /* Permite que os campos se movam para a linha de baixo se necessário */
+            gap: 15px; /* Espaço entre os campos */
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="submit"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            flex: 1; /* Os campos vão ocupar a mesma largura disponível */
+            min-width: 150px; /* Largura mínima para os campos */
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: 100%; /* O botão vai ocupar toda a largura disponível */
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .popup-content {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h1>Registrar Saida de Veículo</h1>
+    <h1>Registrar Saída de Veículo</h1>
     <form action="/saida" method="post">
-        <label for="placa">Placa:</label>
-        <input type="text" id="placa" name="placa" required oninput="formatPlaca(this)" maxlength="8"><br>
-
-        <input type="submit" value="Registrar Saida">
+        <div>
+            <label for="placa">Placa:</label>
+            <input type="text" id="placa" name="placa" required oninput="formatPlaca(this)" maxlength="8"><br>
+        </div>
+        <input type="submit" value="Registrar Saída">
     </form>
     <div class="popup-content">
         <h2></h2>

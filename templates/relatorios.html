@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios - Park-U</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="date"], input[type="submit"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 150px;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #eaeaea;
+        }
+    </style>
+    <script>
+        function formatPlaca(input) {
+            input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (input.value.length > 3) {
+                input.value = input.value.slice(0, 3) + '-' + input.value.slice(3);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Relatórios de Veículos</h1>
+
+    <!-- Formulário de Filtro -->
+    <form method="POST" action="/relatorios">
+        <div>
+            <label for="placa">Placa:</label>
+            <input type="text" id="placa" name="placa" oninput="formatPlaca(this)" maxlength="8">
+        </div>
+        <div>
+            <label for="data_entrada">Data de Entrada:</label>
+            <input type="date" id="data_entrada" name="data_entrada">
+        </div>
+        <div>
+            <label for="data_saida">Data de Saída:</label>
+            <input type="date" id="data_saida" name="data_saida">
+        </div>
+        <div style="flex-basis: 100%; margin-top: 10px;">
+            <input type="submit" value="Filtrar">
+        </div>
+    </form>
+
+    <!-- Tabela de Relatórios -->
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Placa</th>
+                <th>Modelo</th>
+                <th>Horário de Entrada</th>
+                <th>Horário de Saída</th>
+                <th>Tempo de Permanência</th>
+                <th>Valor Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for registro in registros %}
+            <tr>
+                <td>{{ registro.id }}</td>
+                <td>{{ registro.placa }}</td>
+                <td>{{ registro.modelo }}</td>
+                <td>{{ registro.horario_entrada.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                <td>{{ registro.horario_saida.strftime('%d-%m-%Y %H:%M:%S') if registro.horario_saida else 'Não registrado' }}</td>
+                <td>{{ registro.tempo_permanencia }}</td>
+                <td>{{ registro.valor_total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <button onclick="window.location.href='/'">Voltar para a página inicial</button>
+</body>
+</html>

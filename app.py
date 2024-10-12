@@ -3,7 +3,7 @@
 # Faculdade Impacta
 # Aluno: José Albério Bezerra Demésio
 
-vfrom flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template
 import pymysql
 from datetime import datetime
 
@@ -31,7 +31,19 @@ def get_db_connection():
 # Rota para a página inicial
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Conecta ao banco de dados e busca o valor da hora
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT valor_hora FROM configuracoes WHERE id = 1")
+    valor_hora = cursor.fetchone()
+    valor_hora = valor_hora[0] if valor_hora else 0  # Se não existir, define como 0
+
+    # Fecha a conexão com o banco
+    cursor.close()
+    conn.close()
+
+    return render_template('index.html', valor_hora=valor_hora)
 
 # Rota para a página de entrada de veículos
 @app.route('/entrada')
@@ -61,9 +73,7 @@ def entrada_veiculo():
     cursor = conn.cursor()
 
     # Verifica se o veículo já está no estacionamento sem ter saído
-    cursor.execute("""
-        SELECT id FROM registros WHERE placa = %s AND horario_saida IS NULL
-    """, (placa,))
+    cursor.execute("""SELECT id FROM registros WHERE placa = %s AND horario_saida IS NULL""", (placa,))
     veiculo_existente = cursor.fetchone()
 
     # Se o veículo já estiver no estacionamento, exibe mensagem de erro
@@ -73,10 +83,7 @@ def entrada_veiculo():
         return render_template('popup.html', message='Veículo já está no estacionamento.', success=False)
 
     # Insere um novo registro de entrada no banco de dados
-    cursor.execute("""
-        INSERT INTO registros (placa, modelo, horario_entrada, tempo_permanencia)
-        VALUES (%s, %s, %s, %s)
-    """, (placa, modelo, hora_entrada, None))
+    cursor.execute("""INSERT INTO registros (placa, modelo, horario_entrada, tempo_permanencia) VALUES (%s, %s, %s, %s)""", (placa, modelo, hora_entrada, None))
     conn.commit()
 
     # Fecha a conexão com o banco
@@ -94,12 +101,7 @@ def saida_veiculo():
     cursor = conn.cursor()
 
     # Verifica se o veículo está no estacionamento (entrada sem saída registrada)
-    cursor.execute("""
-        SELECT id, horario_entrada
-        FROM registros
-        WHERE placa = %s AND horario_saida IS NULL
-        LIMIT 1
-    """, (placa,))
+    cursor.execute("""SELECT id, horario_entrada FROM registros WHERE placa = %s AND horario_saida IS NULL LIMIT 1""", (placa,))
     entrada = cursor.fetchone()
 
     # Se o veículo não estiver no estacionamento, exibe mensagem de erro
@@ -121,11 +123,7 @@ def saida_veiculo():
     valor_total = horas_estacionadas * valor_hora
 
     # Atualiza o registro no banco de dados com o horário de saída e o valor total
-    cursor.execute("""
-        UPDATE registros
-        SET horario_saida = %s, tempo_permanencia = %s, valor_total = %s
-        WHERE id = %s
-    """, (hora_saida, tempo_permanencia, valor_total, entrada[0]))
+    cursor.execute("""UPDATE registros SET horario_saida = %s, tempo_permanencia = %s, valor_total = %s WHERE id = %s""", (hora_saida, tempo_permanencia, valor_total, entrada[0]))
     conn.commit()
 
     # Fecha a conexão com o banco de dados
@@ -157,7 +155,71 @@ def config_system():
     # Exibe a página de configurações
     return render_template('configuracoes.html')
 
+# Rota para gerar relatórios
+@app.route('/relatorios', methods=['GET', 'POST'])
+def relatorios():
+    conn = get_db_connection()  # Conecta ao banco de dados
+    cursor = conn.cursor(pymysql.cursors.DictCursor)  # Usar DictCursor para retornar os registros como dicionários
 
-# Inicia o servidor Flask, permitindo conexões externas na porta 5000
+    # Paginação
+    page = request.args.get('page', 1, type=int)
+    per_page = 25
+    offset = (page - 1) * per_page
+
+    if request.method == 'POST':
+        placa = request.form.get('placa')
+        data_entrada = request.form.get('data_entrada')
+        data_saida = request.form.get('data_saida')
+
+        query = "SELECT * FROM registros WHERE 1=1"  # Começa com uma condição sempre verdadeira
+        params = []
+
+        if placa:
+            query += " AND placa = %s"
+            params.append(placa)
+
+        if data_entrada:
+            query += " AND horario_entrada >= %s"
+            params.append(data_entrada + " 00:00:00")  # Considera o início do dia
+
+        if data_saida:
+            query += " AND horario_saida <= %s"
+            params.append(data_saida + " 23:59:59")  # Considera o final do dia
+
+        # Se ambos os filtros de data forem fornecidos, vamos garantir que
+        # eles sejam aplicados corretamente.
+        if data_entrada and data_saida:
+            query += " AND horario_entrada BETWEEN %s AND %s"
+            params.append(data_entrada + " 00:00:00")  # Considera o início do dia
+            params.append(data_saida + " 23:59:59")  # Considera o final do dia
+
+        query += " ORDER BY horario_entrada DESC LIMIT %s OFFSET %s"
+        params.append(per_page)
+        params.append(offset)
+
+        cursor.execute(query, params)
+    else:
+        # Busca os últimos 25 registros quando não há filtros
+        cursor.execute("SELECT * FROM registros ORDER BY horario_entrada DESC LIMIT %s OFFSET %s", (per_page, offset))
+
+    registros = cursor.fetchall()  # Busca todos os registros
+
+    # Conta o total de registros
+    cursor.execute("SELECT COUNT(*) AS total FROM registros")
+    total_records_result = cursor.fetchone()
+
+    total_records = total_records_result['total'] if total_records_result else 0
+
+    # Calcula o total de páginas
+    total_pages = (total_records + per_page - 1) // per_page  # Cálculo para arredondar para cima
+
+    # Fecha a conexão com o banco
+    cursor.close()
+    conn.close()
+
+    return render_template('relatorios.html', registros=registros, page=page, total_pages=total_pages)
+
+
+# Executa a aplicação Flask
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(debug=True)
