@@ -3,7 +3,7 @@
 # Faculdade Impacta
 # Aluno: José Albério Bezerra Demésio
 
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect, url_for
 import pymysql
 from datetime import datetime
 
@@ -31,19 +31,27 @@ def get_db_connection():
 # Rota para a página inicial
 @app.route('/')
 def index():
-    # Conecta ao banco de dados e busca o valor da hora
     conn = get_db_connection()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    cursor.execute("SELECT valor_hora FROM configuracoes WHERE id = 1")
-    valor_hora = cursor.fetchone()
-    valor_hora = valor_hora[0] if valor_hora else 0  # Se não existir, define como 0
+        cursor.execute("SELECT valor_hora FROM configuracoes WHERE id = 1")
+        valor_hora = cursor.fetchone()
+        valor_hora = valor_hora[0] if valor_hora else 0  # Se não existir, define como 0
 
-    # Fecha a conexão com o banco
-    cursor.close()
-    conn.close()
+        cursor.execute("SELECT COUNT(*) AS total_veiculos FROM registros WHERE horario_saida IS NULL")
+        total_veiculos = cursor.fetchone()[0]
 
-    return render_template('index.html', valor_hora=valor_hora)
+        cursor.execute("SELECT total_vagas FROM configuracoes WHERE id = 1")
+        total_vagas = cursor.fetchone()[0]
+
+        vagas_disponiveis = total_vagas - total_veiculos
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template('index.html', valor_hora=valor_hora, vagas_disponiveis=vagas_disponiveis)
 
 # Rota para a página de entrada de veículos
 @app.route('/entrada')
@@ -54,11 +62,6 @@ def entrada():
 @app.route('/saida')
 def saida():
     return render_template('saida.html')
-
-# Rota para a página de configurações
-@app.route('/configuracoes')
-def configuracoes():
-    return render_template('configuracoes.html')
 
 # Rota para tratar a entrada de veículos (POST)
 @app.route('/entrada', methods=['POST'])
@@ -133,27 +136,56 @@ def saida_veiculo():
     # Exibe mensagem de sucesso com o valor a ser cobrado
     return render_template('popup.html', message=f'Saída registrada com sucesso. Valor a ser cobrado: R$ {valor_total:.2f}', success=True)
 
-# Rota para exibir e salvar as configurações do sistema
+
+
+# Rota para a página de configurações
 @app.route('/configuracoes', methods=['GET', 'POST'])
 def config_system():
-    if request.method == 'POST':
-        valor_hora = request.form['valor_hora']  # Obtém o valor da hora do formulário
-        conn = get_db_connection()  # Conecta ao banco de dados
+    conn = get_db_connection()
+    try:
         cursor = conn.cursor()
 
-        # Atualiza o valor da hora no banco de dados
-        cursor.execute("UPDATE configuracoes SET valor_hora = %s WHERE id = 1", (valor_hora,))
-        conn.commit()
+        cursor.execute("SELECT valor_hora, total_vagas FROM configuracoes WHERE id = 1")
+        config = cursor.fetchone()
 
-        # Fecha a conexão com o banco
+        if config:
+            valor_hora, total_vagas = config
+        else:
+            valor_hora = 0
+            total_vagas = 0
+
+        if request.method == 'POST':
+            try:
+                valor_hora = float(request.form['valor_hora'])
+                total_vagas = int(request.form['total_vagas'])
+
+                # Validação básica: verificar se os valores são positivos
+                if valor_hora <= 0 or total_vagas < 0:
+                    return render_template('configuracoes.html',
+                                           valor_hora=valor_hora,
+                                           total_vagas=total_vagas,
+                                           error="Valores devem ser positivos.")
+
+                # Utilizando parâmetros nomeados para evitar SQL injection
+                cursor.execute("UPDATE configuracoes SET valor_hora = %(valor_hora)s, total_vagas = %(total_vagas)s WHERE id = 1",
+                               {'valor_hora': valor_hora, 'total_vagas': total_vagas})
+                conn.commit()
+                return redirect(url_for('config_system'))
+            except ValueError:
+                return render_template('configuracoes.html',
+                                       valor_hora=valor_hora,
+                                       total_vagas=total_vagas,
+                                       error="Valores inválidos.")
+
+    except Exception as e:
+        print(f"Erro ao acessar o banco de dados: {e}")
+        return render_template('error.html', message="Ocorreu um erro ao acessar o banco de dados.")
+    finally:
         cursor.close()
         conn.close()
 
-        # Exibe mensagem de sucesso ao salvar as configurações
-        return render_template('popup.html', message='Configurações salvas com sucesso.', success=True)
-
-    # Exibe a página de configurações
-    return render_template('configuracoes.html')
+    valor_hora_formatado = f"{valor_hora:.2f}"
+    return render_template('configuracoes.html', valor_hora=valor_hora_formatado, total_vagas=total_vagas)
 
 # Rota para gerar relatórios
 @app.route('/relatorios', methods=['GET', 'POST'])
@@ -220,6 +252,6 @@ def relatorios():
     return render_template('relatorios.html', registros=registros, page=page, total_pages=total_pages)
 
 
-# Executa a aplicação Flask
+# Executa o servidor
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(debug=True)
