@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Pagamentos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            text-align: left;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .filter-form {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        input, select, button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Relatório de Pagamentos</h1>
+
+    <form action="/relatorios/pagamentos" method="post" class="filter-form">
+        <select name="mensalista_id">
+            <option value="">Selecione um Mensalista</option>
+            {% for mensalista in mensalistas %}
+            <option value="{{ mensalista.id }}">{{ mensalista.nome }}</option>
+            {% endfor %}
+        </select>
+        <input type="date" name="data_inicio" placeholder="Data Início">
+        <input type="date" name="data_fim" placeholder="Data Fim">
+        <button type="submit">Filtrar</button>
+    </form>
+
+    <h3>Total Recebido: R$ {{ total_recebido }}</h3>
+
+    <table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Data do Pagamento</th>
+            <th>Valor Pago</th>
+            <th>Data de Vencimento</th>
+            <th>Nome do Mensalista</th>
+            <th>Placa</th>
+            <th>Status</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pagamento in pagamentos %}
+        <tr style="color: {% if pagamento.status == 'Pendente' %}red{% else %}black{% endif %};">
+            <td>{{ pagamento.id }}</td>
+            <td>{{ pagamento.data_pagamento or '---' }}</td>
+            <td>R$ {{ pagamento.valor_pago or '0,00' }}</td>
+            <td>{{ pagamento.data_vencimento }}</td>
+            <td>{{ pagamento.nome }}</td>
+            <td>{{ pagamento.placa }}</td>
+            <td>{{ pagamento.status }}</td>
+            <td>
+                {% if pagamento.status == 'Pendente' %}
+                <form action="/pagamentos" method="post" style="display: inline;">
+                    <input type="hidden" name="mensalista_id" value="{{ pagamento.id }}">
+                    <input type="hidden" name="valor_pago" value="{{ pagamento.valor_pago }}">
+                    <button type="submit">Regularizar</button>
+                </form>
+                {% else %}
+                ---
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

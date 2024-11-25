@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Entrada de Veículo - ParkU</title>
+    <script>
+        function formatPlaca(input) {
+            // Remove caracteres especiais e converte para maiúsculas
+            let placa = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+            // Adiciona o hífen após os três primeiros caracteres
+            if (placa.length > 3) {
+                placa = placa.slice(0, 3) + '-' + placa.slice(3);
+            }
+
+            // Atualiza o valor do campo de entrada
+            input.value = placa;
+        }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex; /* Use flexbox para layout horizontal */
+            flex-wrap: wrap; /* Permite que os campos se movam para a linha de baixo se necessário */
+            gap: 15px; /* Espaço entre os campos */
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="submit"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            flex: 1; /* Os campos vão ocupar a mesma largura disponível */
+            min-width: 150px; /* Largura mínima para os campos */
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: 100%; /* O botão vai ocupar toda a largura disponível */
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .popup-content {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Registrar Entrada de Veículo</h1>
+    <form action="/entrada" method="post">
+        <div>
+            <label for="placa">Placa:</label>
+            <input type="text" id="placa" name="placa" required oninput="formatPlaca(this)" maxlength="8"><br>
+        </div>
+        <div>
+            <label for="modelo">Modelo:</label>
+            <input type="text" id="modelo" name="modelo" required><br>
+        </div>
+        <input type="submit" value="Registrar Entrada">
+    </form>
+    <div class="popup-content">
+        <h2></h2>
+        <button onclick="window.location.href='/'">Voltar para a página inicial</button>
+    </div>
+</body>
+</html>

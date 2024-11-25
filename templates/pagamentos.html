@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Pagamentos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            text-align: left;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .filter-form {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        input, select, button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .pendente {
+            color: red;
+        }
+        .quitado {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Controle de Pagamentos</h1>
+
+    <!-- Formulário de Filtros -->
+    <form action="/pagamentos" method="post" class="filter-form">
+        <select name="mensalista_id">
+            <option value="">Selecione um Mensalista</option>
+            {% for mensalista in mensalistas %}
+            <option value="{{ mensalista.id }}">{{ mensalista.nome }}</option>
+            {% endfor %}
+        </select>
+        <input type="date" name="data_inicio" placeholder="Data Início">
+        <input type="date" name="data_fim" placeholder="Data Fim">
+        <button type="submit">Filtrar</button>
+    </form>
+
+    <!-- Resumo Total -->
+    <h3>Total Recebido: R$ {{ total_recebido }}</h3>
+
+    <!-- Tabela de Pagamentos -->
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Placa</th>
+                <th>Valor Pago</th>
+                <th>Data do Pagamento</th>
+                <th>Data de Vencimento</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pagamento in pagamentos %}
+            <tr class="{{ 'pendente' if pagamento.status == 'Pendente' else 'quitado' }}">
+                <td>{{ pagamento.id }}</td>
+                <td>{{ pagamento.nome }}</td>
+                <td>{{ pagamento.placa }}</td>
+                <td>R$ {{ pagamento.valor_pago or '0,00' }}</td>
+                <td>{{ pagamento.data_pagamento or '---' }}</td>
+                <td>{{ pagamento.data_vencimento }}</td>
+                <td>{{ pagamento.status }}</td>
+                <td>
+                    {% if pagamento.status == 'Pendente' %}
+                    <form action="/pagamentos/registrar" method="post">
+                        <input type="hidden" name="pagamento_id" value="{{ pagamento.id }}">
+                        <button type="submit">Registrar Pagamento</button>
+                    </form>
+                    {% else %}
+                    ---
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

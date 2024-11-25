@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensalistas - Park-U</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 30px;
+        }
+
+        form {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cadastro de Mensalistas</h1>
+    <form action="{{ url_for('cadastrar_mensalista') }}" method="post">
+    <label for="nome">Nome</label>
+    <input type="text" id="nome" name="nome" placeholder="Digite o nome do mensalista" required>
+
+    <label for="placa">Placa do Veículo</label>
+    <input type="text" id="placa" name="placa" maxlength="8" placeholder="Ex.: ABC-1234" required oninput="formatarPlaca(this)">
+
+    <label for="modelo">Modelo do Veículo</label>
+    <input type="text" id="modelo" name="modelo" placeholder="Ex.: Sedan, SUV" required>
+
+    <label for="telefone">Telefone</label>
+    <input type="text" id="telefone" name="telefone" maxlength="15" placeholder="Ex.: (99) 99999-9999" required oninput="formatarTelefone(this)">
+
+    <label for="email">E-mail</label>
+    <input type="email" id="email" name="email" placeholder="Digite o e-mail" required>
+
+    <label for="data_inicio">Data de Início</label>
+    <input type="date" id="data_inicio" name="data_inicio" required>
+
+    <label for="valor_mensal">Valor Mensal (R$)</label>
+    <input type="text" id="valor_mensal" name="valor_mensal" placeholder="Digite o valor da mensalidade" required oninput="formatarValor(this)">
+
+    <button type="submit">Cadastrar Mensalista</button>
+</form>
+
+<script>
+    // Formatar Placa do Veículo
+    function formatarPlaca(input) {
+        let valor = input.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        if (valor.length > 3) {
+            valor = valor.substring(0, 3) + '-' + valor.substring(3, 7);
+        }
+        input.value = valor;
+    }
+
+    // Formatar Telefone
+    function formatarTelefone(input) {
+    let valor = input.value.replace(/\D/g, ''); // Remove tudo que não for número
+
+    // Formata o número conforme o comprimento
+    if (valor.length > 2) {
+        valor = '(' + valor.substring(0, 2) + ') ' + valor.substring(2); // Adiciona o DDD
+    }
+    if (valor.length > 7) {
+        valor = valor.substring(0, 9) + '-' + valor.substring(9); // Adiciona o hífen antes dos 4 últimos dígitos
+    }
+
+    // Limita a 15 caracteres para evitar formatações extras
+    if (valor.length > 15) {
+        valor = valor.substring(0, 15);
+    }
+
+    input.value = valor; // Atualiza o valor no campo
+}
+
+
+    // Formatar Valor com "R$"
+    function formatarValor(input) {
+        let valor = input.value.replace(/\D/g, ''); // Remove tudo que não for número
+        if (valor.length > 2) {
+            valor = 'R$ ' + valor.slice(0, -2) + ',' + valor.slice(-2);
+        } else {
+            valor = 'R$ ' + valor; // Caso tenha menos de 2 dígitos
+        }
+        input.value = valor;
+    }
+</script>
+
+{% if mensagem %}
+<div style="margin: 20px 0; padding: 15px; background-color: {% if 'sucesso' in mensagem %}#d4edda{% else %}#f8d7da{% endif %}; color: {% if 'sucesso' in mensagem %}#155724{% else %}#721c24{% endif %}; border: 1px solid {% if 'sucesso' in mensagem %}#c3e6cb{% else %}#f5c6cb{% endif %}; border-radius: 5px;">
+    {{ mensagem }}
+</div>
+{% endif %}
+
+
+
+    <a href="/" class="back-link">Voltar para a página inicial</a>
+</body>
+</html>

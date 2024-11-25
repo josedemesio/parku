@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Mensalistas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        a, button {
+            text-decoration: none;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        a:hover, button:hover {
+            background-color: #45a049;
+        }
+        form {
+            display: inline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lista de Mensalistas</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Placa</th>
+                <th>Modelo</th>
+                <th>Telefone</th>
+                <th>E-mail</th>
+                <th>Valor Mensal (R$)</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mensalista in mensalistas %}
+            <tr>
+                <td>{{ mensalista.id }}</td>
+                <td>{{ mensalista.nome }}</td>
+                <td>{{ mensalista.placa }}</td>
+                <td>{{ mensalista.modelo }}</td>
+                <td>{{ mensalista.telefone }}</td>
+                <td>{{ mensalista.email }}</td>
+                <td>R$ {{ mensalista.valor_mensal }}</td>
+                <td>
+                    <a href="/mensalistas/editar/{{ mensalista.id }}">Editar</a>
+                    <form action="/mensalistas/alterar_status/{{ mensalista.id }}" method="post">
+                        <button type="submit">
+                            {{ 'Cancelar' if mensalista.status == 'Ativo' else 'Ativar' }}
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
